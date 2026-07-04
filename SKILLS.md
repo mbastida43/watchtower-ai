@@ -32,6 +32,9 @@ https://youtu.be/J3JyVL6Jld0?si=THposc939DRSVFUG
 
 https://medium.com/artificial-corner/we-built-70-claude-skills-these-are-the-best-f68034e32dbb
 
+7) Best ranked claude Skills
+https://github.com/mbastida43/claude-code-skills-ranked/
+
 ## License
 
 [MIT License](LICENSE)
