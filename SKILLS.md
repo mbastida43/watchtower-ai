@@ -35,6 +35,9 @@ https://medium.com/artificial-corner/we-built-70-claude-skills-these-are-the-bes
 7) Best ranked claude Skills
 https://github.com/mbastida43/claude-code-skills-ranked/
 
+7) A Senior developer that knows how to deal with a clean code
+https://github.com/DietrichGebert/ponytail
+
 ## License
 
 [MIT License](LICENSE)
