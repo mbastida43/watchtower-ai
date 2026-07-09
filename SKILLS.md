@@ -9,16 +9,13 @@ Some repositories, youtube videos, medium article and links to add skills for cl
 
 https://github.com/mbastida43/book-to-skill
 
-
 2)  Website Skill . sh:
 
 https://www.skills.sh/
 
-
 3) Top 10 claude code skills:
 
 https://www.welcomedeveloper.com/posts/the-10-claude-code-skills/
-
 
 4) 100 Claude Skills. These Are The Best:
 
@@ -33,6 +30,7 @@ https://youtu.be/J3JyVL6Jld0?si=THposc939DRSVFUG
 https://medium.com/artificial-corner/we-built-70-claude-skills-these-are-the-best-f68034e32dbb
 
 7) Best ranked claude Skills
+
 https://github.com/mbastida43/claude-code-skills-ranked/
 
 8)  A Senior developer that knows how to deal with a clean code
