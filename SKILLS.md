@@ -35,7 +35,7 @@ https://github.com/mbastida43/claude-code-skills-ranked/
 
 8)  A Senior developer that knows how to deal with a clean code
 
-[https://medium.com/artificial-corner/we-built-70-claude-skills-these-are-the-best-f68034e32dbb](https://github.com/DietrichGebert/ponytail)
+https://github.com/DietrichGebert/ponytail
 
 
 ## License
