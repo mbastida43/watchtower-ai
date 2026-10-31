@@ -36,6 +36,3 @@ If you created or enabled a skill in your web or desktop Claude account, it will
 2. Type `/plugin` and press Enter to open the plugin browser.
 3. Navigate to the **Discover** tab and select the skill/plugin you want to install.
 
-
-- Ultimate_SaaS_Security_Playbook
-
