@@ -1,0 +1,751 @@
+<title>Fábrica de Conteúdo com IA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: manual técnico de oficina. Índice fixo à esquerda no desktop, conteúdo em coluna de leitura, tabelas largas com rolagem própria. Linha visual escura/dourada da OmniForge. */
+:root{
+  --bg:#F4F5F7; --surface:#FFFFFF; --ink:#141821; --muted:#5B6372; --line:#DCE0E6;
+  --gold:#9A7414; --gold-soft:#F3EAD3; --code-bg:#EEF0F3;
+  --ok:#1F7A4D; --warn:#A35A00; --bad:#B42318;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",Roboto,Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1117; --surface:#161B24; --ink:#E7EAF0; --muted:#98A1B2; --line:#2A3140;
+  --gold:#D6B25E; --gold-soft:#2A2414; --code-bg:#1C2230;
+  --ok:#5CC48F; --warn:#E5A44B; --bad:#F2786D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1117; --surface:#161B24; --ink:#E7EAF0; --muted:#98A1B2; --line:#2A3140;
+  --gold:#D6B25E; --gold-soft:#2A2414; --code-bg:#1C2230;
+  --ok:#5CC48F; --warn:#E5A44B; --bad:#F2786D; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:var(--gold)}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px;padding-block:40px 80px}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;font-size:14px}
+nav.toc p{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;border-left:1px solid var(--line)}
+nav.toc a{display:block;padding:4px 12px;color:var(--muted);text-decoration:none}
+nav.toc a:hover{color:var(--ink);border-left:2px solid var(--gold);margin-left:-1px;padding-left:11px}
+main{min-width:0}
+header.hero{padding-bottom:28px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(2rem,4.6vw,3.2rem);line-height:1.05;margin:10px 0 14px;text-wrap:balance;letter-spacing:-.01em}
+h2{font-family:var(--f-display);font-weight:700;font-size:1.6rem;line-height:1.2;margin:0 0 6px;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:700;font-size:1.12rem;margin:28px 0 8px}
+.lead{font-size:1.1rem;color:var(--muted);max-width:68ch;margin:0}
+section{padding-block:44px 8px;border-bottom:1px solid var(--line);scroll-margin-top:16px}
+section > p,section > ul,section > ol{max-width:72ch}
+.kicker{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin:0 0 18px}
+.meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:20px;font-size:14px;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:600}
+code,kbd{font-family:var(--f-mono);font-size:.86em;background:var(--code-bg);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+pre{font-family:var(--f-mono);font-size:13px;line-height:1.55;background:var(--code-bg);padding:16px 18px;border-radius:8px;overflow-x:auto;margin:12px 0 20px;max-width:100%}
+pre code{background:none;padding:0}
+.tbl{overflow-x:auto;margin:12px 0 24px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:760px}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--code-bg)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600;white-space:nowrap}
+.note{background:var(--gold-soft);border-left:3px solid var(--gold);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:72ch}
+.note.red{border-color:var(--bad)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:16px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+.card h4{font-family:var(--f-display);margin:0 0 6px;font-size:1rem}
+.card p,.card ul{margin:0;font-size:14px;color:var(--muted)}
+.card ul{padding-left:18px}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:11px;padding:1px 8px;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
+.pill.ok{color:var(--ok)} .pill.warn{color:var(--warn)} .pill.bad{color:var(--bad)}
+details.plat{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:12px 0;padding:0 18px}
+details.plat[open]{padding-bottom:14px}
+details.plat summary{cursor:pointer;padding:14px 0;font-family:var(--f-display);font-weight:700;font-size:1.05rem;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+details.plat summary span{font-family:var(--f-body);font-weight:400;font-size:14px;color:var(--muted)}
+details.plat dl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:8px 16px;margin:4px 0 0;font-size:14.5px}
+details.plat dt{font-family:var(--f-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-top:3px}
+details.plat dd{margin:0;min-width:0}
+details.plat dd ol,details.plat dd ul{margin:0;padding-left:18px}
+ol.steps{counter-reset:s;list-style:none;padding:0;max-width:78ch}
+ol.steps > li{counter-increment:s;position:relative;padding:0 0 18px 52px}
+ol.steps > li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:0;font-family:var(--f-mono);font-size:13px;color:var(--gold);border:1px solid var(--gold);border-radius:6px;padding:2px 6px}
+ol.steps > li b{font-family:var(--f-display)}
+.flow{overflow-x:auto;margin:16px 0 24px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px}
+.flow svg{display:block;min-width:900px;width:100%;height:auto}
+.flow text{font-family:var(--f-body);fill:var(--ink)}
+.flow .lbl{font-family:var(--f-mono);font-size:10.5px;fill:var(--muted);letter-spacing:.08em}
+.flow .box{fill:var(--bg);stroke:var(--line)}
+.flow .hot{fill:var(--gold-soft);stroke:var(--gold)}
+.flow .arr{stroke:var(--muted);fill:none;stroke-width:1.4}
+.flow .arrhead{fill:var(--muted)}
+.timeline{display:grid;grid-template-columns:90px minmax(0,1fr);gap:6px 16px;font-size:14.5px;max-width:78ch}
+.timeline .t{font-family:var(--f-mono);color:var(--gold);font-variant-numeric:tabular-nums}
+footer{padding-block:36px;color:var(--muted);font-size:13px}
+@media (max-width:860px){
+  .wrap{grid-template-columns:1fr;gap:20px;padding-block:24px 60px}
+  nav.toc{position:static}
+  nav.toc ol{flex-direction:row;flex-wrap:wrap;border-left:0;gap:6px}
+  nav.toc a{border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:13px}
+  nav.toc a:hover{border-left:1px solid var(--gold);margin-left:0;padding-left:10px}
+  details.plat dl{grid-template-columns:1fr;gap:2px}
+  details.plat dd{margin-bottom:8px}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Índice">
+  <p>Índice</p>
+  <ol>
+    <li><a href="#visao">Visão geral</a></li>
+    <li><a href="#arquitetura">Arquitetura</a></li>
+    <li><a href="#plataformas">Plataformas e acessos</a></li>
+    <li><a href="#locais">Ferramentas locais</a></li>
+    <li><a href="#variaveis">Variáveis e segredos</a></li>
+    <li><a href="#pastas">Pastas e repositório</a></li>
+    <li><a href="#scripts">Scripts</a></li>
+    <li><a href="#pipeline">Pipeline</a></li>
+    <li><a href="#rotina">Rotina diária</a></li>
+    <li><a href="#regras">Regras e armadilhas</a></li>
+    <li><a href="#zero">Replicar do zero</a></li>
+    <li><a href="#custos">Custos e limites</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="hero">
+  <div class="eyebrow">Mentoria · Operação de redes sociais com IA</div>
+  <h1>Fábrica de Conteúdo com IA: tudo o que operamos e como replicar</h1>
+  <p class="lead">Inventário completo da operação que produz e publica todo dia no Instagram, YouTube, LinkedIn e status do WhatsApp com agentes Claude, voz clonada, vídeo por código e um painel de aprovação na Cloudflare. Cada item diz para que serve, onde conseguir o acesso, que permissões pedir e onde ele mora no setup.</p>
+  <div class="meta">
+    <span><b>Perfis:</b> pessoal (IA aplicada) e empresa (OmniForge, nicho farmácias de manipulação)</span>
+    <span><b>Redes:</b> Instagram, YouTube Shorts, LinkedIn, WhatsApp Status</span>
+    <span><b>Versão:</b> 20/10/2026</span>
+  </div>
+  <div class="note red" style="margin-top:20px"><b>Material de aula.</b> Nenhum token, senha, chave, ID de conta ou login real aparece aqui. As variáveis estão listadas só pelo nome. Para replicar, cada aluno gera as suas.</div>
+</header>
+
+<!-- 1 -->
+<section id="visao">
+  <h2>Visão geral</h2>
+  <p class="kicker">O que a máquina faz, em uma frase por etapa</p>
+  <div class="grid2">
+    <div class="card"><h4>Pesquisa</h4><p>Todo dia de madrugada um agente varre notícias de IA (EUA, China, Índia, Brasil), mede outliers de concorrentes no Instagram via Apify e grava a pauta do dia.</p></div>
+    <div class="card"><h4>Produção</h4><p>Agentes Claude escrevem roteiro e legenda, geram narração com a voz clonada (ElevenLabs), imagens (FLUX), vídeo por código (Remotion e GSAP) e passam por QA automático.</p></div>
+    <div class="card"><h4>Aprovação</h4><p>Toda peça entra num painel web como "aguardando". Nada sai sem o clique de Aprovar do dono. Sem aprovação perto da hora, o painel avisa no WhatsApp.</p></div>
+    <div class="card"><h4>Publicação</h4><p>Um Cron na Cloudflare publica na hora marcada pela Graph API, manda o Reel ao YouTube Shorts, o post ao LinkedIn e o story ao status do WhatsApp.</p></div>
+    <div class="card"><h4>Entrega do CTA</h4><p>Quem comenta a palavra do CTA recebe um PDF por direct. Um agente de atendimento lê a lista de entregas no GitHub e responde sozinho.</p></div>
+    <div class="card"><h4>Aprendizado</h4><p>As métricas dos próprios posts e dos benchmarks voltam para o lote seguinte: ganchos que ganham viram regra em um arquivo de aprendizados.</p></div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="arquitetura">
+  <h2>Mapa da arquitetura</h2>
+  <p class="kicker">Da pesquisa ao post, com onde cada dado fica guardado</p>
+  <div class="flow" role="img" aria-label="Diagrama: fontes de pesquisa alimentam agentes Claude, que produzem com ElevenLabs, FLUX, Remotion e GSAP; mídia vai ao R2, itens ao painel na Cloudflare, que publica no Instagram, YouTube, LinkedIn e WhatsApp; comentários chegam ao OmniTalk, que entrega PDFs.">
+  <svg viewBox="0 0 1100 470" xmlns="http://www.w3.org/2000/svg">
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrhead"/></marker></defs>
+    <text x="20" y="22" class="lbl">1 · PESQUISA</text>
+    <text x="250" y="22" class="lbl">2 · PRODUÇÃO (AGENTES CLAUDE)</text>
+    <text x="590" y="22" class="lbl">3 · APROVAÇÃO E AGENDA</text>
+    <text x="870" y="22" class="lbl">4 · REDES</text>
+
+    <rect x="20" y="40" width="190" height="52" rx="8" class="box"/><text x="34" y="62" font-size="14" font-weight="600">Busca web + SearXNG</text><text x="34" y="80" font-size="12" fill="currentColor" opacity=".7">notícias de IA por região</text>
+    <rect x="20" y="104" width="190" height="52" rx="8" class="box"/><text x="34" y="126" font-size="14" font-weight="600">Apify</text><text x="34" y="144" font-size="12" opacity=".7">outliers de perfis no IG</text>
+    <rect x="20" y="168" width="190" height="52" rx="8" class="box"/><text x="34" y="190" font-size="14" font-weight="600">Graph API (insights)</text><text x="34" y="208" font-size="12" opacity=".7">métricas dos nossos posts</text>
+    <rect x="20" y="232" width="190" height="52" rx="8" class="box"/><text x="34" y="254" font-size="14" font-weight="600">Referências do dono</text><text x="34" y="272" font-size="12" opacity=".7">prints, Reels, estudos</text>
+
+    <rect x="250" y="40" width="300" height="244" rx="10" class="hot"/>
+    <text x="266" y="66" font-size="15" font-weight="700">Claude Code (projeto + threads)</text>
+    <text x="266" y="92" font-size="13">Pauta + checagem anti-repetição</text>
+    <text x="266" y="116" font-size="13">Roteiro, legenda, 3 ganchos</text>
+    <text x="266" y="140" font-size="13">Voz clonada · ElevenLabs eleven_v3</text>
+    <text x="266" y="164" font-size="13">Imagem · FLUX (Hugging Face)</text>
+    <text x="266" y="188" font-size="13">Vídeo · Remotion / GSAP + Playwright</text>
+    <text x="266" y="212" font-size="13">Áudio · ffmpeg, -14 LUFS, SFX</text>
+    <text x="266" y="236" font-size="13">QA automático (qa.txt)</text>
+    <text x="266" y="264" font-size="12" opacity=".7">memória do projeto + skills</text>
+
+    <rect x="250" y="320" width="140" height="56" rx="8" class="box"/><text x="264" y="344" font-size="14" font-weight="600">Pasta do projeto</text><text x="264" y="362" font-size="12" opacity=".7">/mnt/project-files</text>
+    <rect x="410" y="320" width="140" height="56" rx="8" class="box"/><text x="424" y="344" font-size="14" font-weight="600">GitHub privado</text><text x="424" y="362" font-size="12" opacity=".7">espelho + entregas</text>
+
+    <rect x="590" y="40" width="240" height="56" rx="8" class="box"/><text x="604" y="64" font-size="14" font-weight="600">Cloudflare R2</text><text x="604" y="82" font-size="12" opacity=".7">mídia com URL pública</text>
+    <rect x="590" y="120" width="240" height="164" rx="10" class="hot"/>
+    <text x="604" y="146" font-size="15" font-weight="700">Painel publicador</text>
+    <text x="604" y="170" font-size="13">Worker + D1 + Cron 1/min</text>
+    <text x="604" y="194" font-size="13">Aprovar = "sim" do dono</text>
+    <text x="604" y="218" font-size="13">teto diário, intervalo 60 min</text>
+    <text x="604" y="242" font-size="13">anti-repetição (md5 e legenda)</text>
+    <text x="604" y="266" font-size="12" opacity=".7">avisa no WhatsApp se faltar ok</text>
+    <rect x="590" y="320" width="240" height="56" rx="8" class="box"/><text x="604" y="344" font-size="14" font-weight="600">WAHA (WhatsApp)</text><text x="604" y="362" font-size="12" opacity=".7">alertas + status + pauta</text>
+
+    <rect x="870" y="40" width="210" height="48" rx="8" class="box"/><text x="884" y="69" font-size="14" font-weight="600">Instagram (2 contas)</text>
+    <rect x="870" y="100" width="210" height="48" rx="8" class="box"/><text x="884" y="129" font-size="14" font-weight="600">YouTube Shorts</text>
+    <rect x="870" y="160" width="210" height="48" rx="8" class="box"/><text x="884" y="189" font-size="14" font-weight="600">LinkedIn pessoal</text>
+    <rect x="870" y="220" width="210" height="48" rx="8" class="box"/><text x="884" y="249" font-size="14" font-weight="600">Status do WhatsApp</text>
+    <rect x="870" y="320" width="210" height="56" rx="8" class="hot"/><text x="884" y="344" font-size="14" font-weight="600">OmniTalk (atendimento)</text><text x="884" y="362" font-size="12" opacity=".7">comentário → PDF no direct</text>
+
+    <path d="M210 160 H250" class="arr" marker-end="url(#ah)"/>
+    <path d="M550 160 H590" class="arr" marker-end="url(#ah)"/>
+    <path d="M550 70 H590" class="arr" marker-end="url(#ah)"/>
+    <path d="M400 284 V320" class="arr" marker-end="url(#ah)"/>
+    <path d="M830 64 H870" class="arr" marker-end="url(#ah)"/>
+    <path d="M830 150 L870 124" class="arr" marker-end="url(#ah)"/>
+    <path d="M830 184 H870" class="arr" marker-end="url(#ah)"/>
+    <path d="M830 230 L870 244" class="arr" marker-end="url(#ah)"/>
+    <path d="M710 284 V320" class="arr" marker-end="url(#ah)"/>
+    <path d="M1080 64 C1100 64 1100 348 1080 348" class="arr" marker-end="url(#ah)"/>
+    <path d="M550 348 C600 420 840 420 870 360" class="arr" marker-end="url(#ah)"/>
+    <text x="640" y="430" font-size="12" opacity=".7">lista de entregas (entregas.json) lida do GitHub</text>
+    <text x="1012" y="210" font-size="11" opacity=".7" transform="rotate(90 1092 210)">comentários</text>
+  </svg>
+  </div>
+  <p>Três princípios seguram a arquitetura: <b>agentes produzem, um único publicador publica</b>; <b>mídia sempre em URL pública</b> (a Graph API não aceita upload direto de arquivo, ela baixa da URL); e <b>todo segredo em um só arquivo</b> de variáveis, nunca no chat, em commit ou em post.</p>
+</section>
+
+<!-- 3 -->
+<section id="plataformas">
+  <h2>Plataformas e acessos</h2>
+  <p class="kicker">Clique em cada uma: o que usamos, como criar, permissões, variáveis e armadilhas</p>
+
+  <h3>Resumo</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Plataforma</th><th>Papel na operação</th><th>Onde conseguir</th><th>Variáveis (nomes)</th><th>Custo</th></tr></thead>
+    <tbody>
+      <tr><td>Instagram / Meta</td><td>Publicar feed, carrossel, Reels, stories; ler métricas e posts</td><td>developers.facebook.com</td><td><code>META_APP_ID</code>, <code>META_APP_SECRET</code>, <code>META_USER_ACCESS_TOKEN</code>, <code>META_PAGE_ID_*</code>, <code>META_PAGE_TOKEN_*</code>, <code>IG_BUSINESS_ID_*</code></td><td>Grátis</td></tr>
+      <tr><td>YouTube</td><td>Shorts automáticos do mesmo Reel; leitura do canal</td><td>console.cloud.google.com</td><td><code>YT_CLIENT_ID</code>, <code>YT_CLIENT_SECRET</code>, <code>YT_REFRESH_TOKEN</code></td><td>Grátis (cota diária)</td></tr>
+      <tr><td>LinkedIn</td><td>Post pessoal: texto, foto, vídeo, PDF</td><td>linkedin.com/developers</td><td><code>LINKEDIN_CLIENT_ID</code>, <code>LINKEDIN_CLIENT_SECRET</code>, <code>LINKEDIN_ACCESS_TOKEN</code>, <code>LINKEDIN_REFRESH_TOKEN</code>, <code>LINKEDIN_PERSON_URN</code>, <code>LINKEDIN_*_EXPIRES</code></td><td>Grátis</td></tr>
+      <tr><td>WhatsApp (WAHA)</td><td>Status, alertas de aprovação, pauta no grupo</td><td>waha.devlike.pro (self-hosted)</td><td><code>WAHA_URL</code>, <code>WAHA_SESSION</code>, <code>WAHA_API_KEY</code></td><td>Servidor próprio</td></tr>
+      <tr><td>Cloudflare R2</td><td>Hospedar mídia com URL pública</td><td>dash.cloudflare.com → R2</td><td><code>R2_ENDPOINT</code>, <code>R2_BUCKET</code>, <code>R2_PUBLIC_URL</code>, <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code></td><td>Plano grátis cobre</td></tr>
+      <tr><td>Cloudflare Workers + D1</td><td>Painel de aprovação e Cron que publica</td><td>dash.cloudflare.com → Workers</td><td>segredos do Worker (ver seção 4)</td><td>Plano grátis cobre</td></tr>
+      <tr><td>ElevenLabs</td><td>Voz clonada que narra Reels e stories</td><td>elevenlabs.io</td><td><code>ELEVENLABS_API_KEY</code> (+ id da voz)</td><td>Starter, 90 mil caracteres/mês</td></tr>
+      <tr><td>Hugging Face (FLUX)</td><td>Imagens ilustrativas</td><td>huggingface.co/settings/tokens</td><td><code>HF_TOKEN</code></td><td>Grátis com cota</td></tr>
+      <tr><td>Apify</td><td>Raspar posts e Reels de perfis de referência</td><td>console.apify.com</td><td><code>APIFY_TOKEN</code>, <code>APIFY_TOKENS</code></td><td>~US$ 0,40 por rodada</td></tr>
+      <tr><td>OpenAI / classificadores</td><td>Classificar perfis e fotos (pesquisa de público)</td><td>platform.openai.com e fornecedor do classificador</td><td><code>OPENAI_API_KEY</code>, <code>JEV_API_KEY</code></td><td>Por uso</td></tr>
+      <tr><td>GitHub</td><td>Espelho do projeto, código do painel, lista de entregas</td><td>github.com</td><td>token só leitura no agente de atendimento</td><td>Grátis (sem Actions)</td></tr>
+      <tr><td>OmniTalk</td><td>Caixa de entrada que recebe comentários e DMs e entrega o PDF</td><td>plataforma própria (omnichannel com IA)</td><td>login de demonstração para gravar telas</td><td>Próprio</td></tr>
+      <tr><td>Claude Code</td><td>Os agentes: projeto, threads, rotinas, memória</td><td>claude.ai/code</td><td>conta claude.ai + GitHub conectado</td><td>Assinatura</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Detalhe por plataforma</h3>
+
+  <details class="plat" open>
+    <summary>Instagram (Meta Graph API) <span>publicação e leitura das duas contas</span></summary>
+    <dl>
+      <dt>Pré-requisitos</dt><dd>Conta Instagram <b>profissional</b> (Business ou Criador) ligada a uma <b>Página do Facebook</b>. Um portfólio no Meta Business Suite ajuda a organizar várias contas.</dd>
+      <dt>Criar o app</dt><dd><ol>
+        <li>developers.facebook.com → Meus apps → Criar app → tipo <b>Empresa</b>.</li>
+        <li>Adicione o produto <b>Instagram</b> (API com login do Facebook).</li>
+        <li>Em Configurações básicas copie o ID e a chave secreta do app → <code>META_APP_ID</code>, <code>META_APP_SECRET</code>.</li>
+        <li>Para uso próprio o app pode ficar em modo de desenvolvimento, com você como administrador. Revisão do app só é exigida para publicar em contas de terceiros.</li>
+      </ol></dd>
+      <dt>Permissões</dt><dd><code>instagram_basic</code>, <code>instagram_content_publish</code>, <code>pages_show_list</code>, <code>pages_read_engagement</code>, <code>business_management</code>; para métricas <code>instagram_manage_insights</code>; para ler e responder comentários <code>instagram_manage_comments</code>; para direct <code>instagram_manage_messages</code>.</dd>
+      <dt>Gerar tokens</dt><dd><ol>
+        <li>Graph API Explorer → escolha o app → marque as permissões → gere o token de usuário.</li>
+        <li>Troque por um token de longa duração (60 dias): <code>GET /oauth/access_token?grant_type=fb_exchange_token&amp;client_id=…&amp;client_secret=…&amp;fb_exchange_token=…</code> → <code>META_USER_ACCESS_TOKEN</code>.</li>
+        <li><code>GET /me/accounts</code> com esse token devolve cada Página com o seu token de página (derivado de um token longo, ele não expira) → <code>META_PAGE_ID_&lt;CONTA&gt;</code>, <code>META_PAGE_TOKEN_&lt;CONTA&gt;</code>.</li>
+        <li><code>GET /{page-id}?fields=instagram_business_account</code> → <code>IG_BUSINESS_ID_&lt;CONTA&gt;</code>.</li>
+      </ol></dd>
+      <dt>Como publica</dt><dd>Duas chamadas. 1) <code>POST /{ig-id}/media</code> cria o contêiner com <code>image_url</code> (só JPEG), ou <code>video_url</code> + <code>media_type=REELS</code>, ou <code>media_type=STORIES</code>, ou <code>CAROUSEL</code> com filhos criados antes. 2) Espera <code>status_code=FINISHED</code> (vídeo leva minutos) e chama <code>POST /{ig-id}/media_publish</code>. Versão usada: v21.0.</dd>
+      <dt>O que a API não faz</dt><dd>Não agenda (agendamos nós, no Cron do painel); não põe enquete, figurinha nem música licenciada em story; não aceita arquivo local, só URL pública.</dd>
+      <dt>No nosso setup</dt><dd>Scripts <code>posts/publish_ig.py</code> (carrossel, imagem, story), <code>publish_reel.py</code>, <code>publish_collab.py</code> (collab); no painel, <code>painel/src/graph.js</code>. Para apagar um repetido: <code>DELETE /{media-id}</code> com o token da página.</dd>
+    </dl>
+  </details>
+
+  <details class="plat">
+    <summary>YouTube (Data API v3) <span>Shorts automáticos</span></summary>
+    <dl>
+      <dt>Criar o projeto</dt><dd><ol>
+        <li>console.cloud.google.com → novo projeto.</li>
+        <li>APIs e serviços → ative <b>YouTube Data API v3</b> (e <b>YouTube Analytics API</b> se quiser métricas).</li>
+        <li>Tela de consentimento OAuth: tipo Externo, adicione seu e-mail como usuário de teste.</li>
+        <li>Credenciais → ID do cliente OAuth tipo <b>App para computador</b> → <code>YT_CLIENT_ID</code>, <code>YT_CLIENT_SECRET</code>.</li>
+        <li>Rode o fluxo OAuth uma vez no seu computador (ou pelo OAuth Playground) com <code>access_type=offline</code> e guarde o refresh token → <code>YT_REFRESH_TOKEN</code>.</li>
+      </ol></dd>
+      <dt>Escopos</dt><dd><code>youtube.upload</code> para publicar; <code>youtube</code>, <code>youtube.readonly</code>, <code>youtube.force-ssl</code> para ler e editar; <code>yt-analytics.readonly</code> para métricas.</dd>
+      <dt>Como publica</dt><dd>Upload resumível de um MP4 9:16 com menos de 60 s. Título = 1ª linha da legenda + <code>#Shorts</code>; descrição = legenda. Feito pelo painel logo depois de o Reel sair no Instagram (campo "Também no YouTube").</dd>
+      <dt>Armadilhas</dt><dd>Com a tela de consentimento em "Teste", o refresh token expira em 7 dias: publique o app em "Produção" para uso contínuo. Projetos de API não auditados podem ter vídeos travados como privados; confira no Studio o primeiro envio. A cota diária padrão é de 10 mil unidades e cada upload custa caro, então não faça reenvios em laço.</dd>
+      <dt>No nosso setup</dt><dd><code>posts/publish_youtube.py</code> (manual) e <code>painel/src/youtube.js</code> (automático). Só o perfil pessoal vai ao canal; Reels da empresa não.</dd>
+    </dl>
+  </details>
+
+  <details class="plat">
+    <summary>LinkedIn <span>perfil pessoal</span></summary>
+    <dl>
+      <dt>Criar o app</dt><dd><ol>
+        <li>linkedin.com/developers/apps → Create app. O LinkedIn exige uma <b>Página de empresa</b> vinculada ao app, mesmo para postar no perfil pessoal; o admin da página aprova o vínculo.</li>
+        <li>Aba Products: peça <b>Share on LinkedIn</b> e <b>Sign In with LinkedIn using OpenID Connect</b> (liberam na hora).</li>
+        <li>Copie Client ID e Client Secret → <code>LINKEDIN_CLIENT_ID</code>, <code>LINKEDIN_CLIENT_SECRET</code>.</li>
+      </ol></dd>
+      <dt>Token</dt><dd>Docs and tools → OAuth Token Tools → escopos <code>openid</code>, <code>profile</code>, <code>w_member_social</code> → login com o perfil pessoal → <code>LINKEDIN_ACCESS_TOKEN</code> (~60 dias). Se o app receber refresh token, guarde em <code>LINKEDIN_REFRESH_TOKEN</code> (~1 ano) e as datas em <code>LINKEDIN_ACCESS_EXPIRES</code> / <code>LINKEDIN_REFRESH_EXPIRES</code>. O ID do membro sai de <code>GET /v2/userinfo</code> → <code>LINKEDIN_PERSON_URN</code>.</dd>
+      <dt>Como publica</dt><dd>API REST de posts com o cabeçalho <code>LinkedIn-Version</code> (AAAAMM). Texto, imagem, vídeo e documento PDF (o "carrossel" do LinkedIn). Link vai no 1º comentário.</dd>
+      <dt>Limites</dt><dd><code>w_member_social</code> só publica: não lê métricas nem comentários de terceiros.</dd>
+      <dt>No nosso setup</dt><dd><code>posts/publish_linkedin.py</code> (renova o token sozinho) e <code>painel/src/linkedin.js</code>. Regras de tom em <code>linkedin/ADAPTACAO.md</code>; passo a passo em <code>linkedin/COMO-CONECTAR.md</code>. Teto de 1 post por dia.</dd>
+    </dl>
+  </details>
+
+  <details class="plat">
+    <summary>WhatsApp via WAHA <span>status, alertas e pauta</span></summary>
+    <dl>
+      <dt>O que é</dt><dd>WAHA (WhatsApp HTTP API) é um servidor que você hospeda (Docker) e que conecta um número de WhatsApp lendo o QR code, expondo uma API REST. Não é a API oficial da Meta.</dd>
+      <dt>Montar</dt><dd><ol>
+        <li>Suba o contêiner <code>devlikeapro/waha</code> numa VPS (Docker / Docker Swarm), com chave de API definida.</li>
+        <li>Crie uma sessão e leia o QR com o celular. Usamos o engine GOWS.</li>
+        <li>Guarde <code>WAHA_URL</code>, <code>WAHA_SESSION</code>, <code>WAHA_API_KEY</code> (cabeçalho <code>X-Api-Key</code>).</li>
+      </ol></dd>
+      <dt>Chamadas usadas</dt><dd><code>POST /api/{sessão}/status/image|video|text</code> (status), <code>POST /api/sendText</code> (alertas no grupo), leitura de <code>status@broadcast</code> para conferir se o status já existe antes de reenviar.</dd>
+      <dt>Armadilhas</dt><dd>Atrás de Cloudflare, mande User-Agent ou recebe 403. Vídeo grande (≈50 MB) falha: comprima com ffmpeg (<code>-crf 26 -maxrate 2500k</code>) para menos de ~16 MB. Duas execuções no mesmo minuto duplicam status: confira o status@broadcast antes e depois. Número não oficial pode ser bloqueado se abusar de volume.</dd>
+      <dt>Alternativa oficial</dt><dd>WhatsApp Business Cloud API (Meta) para mensagens a clientes. Ela não publica status.</dd>
+      <dt>No nosso setup</dt><dd><code>posts/whatsapp/status_waha.py</code>, <code>avisar_sem_sim.py</code>, <code>pauta_whats.py</code>; no painel o Worker manda o status depois de o item sair no Instagram.</dd>
+    </dl>
+  </details>
+
+  <details class="plat">
+    <summary>Cloudflare R2 <span>armazenamento de mídia</span></summary>
+    <dl>
+      <dt>Criar</dt><dd><ol>
+        <li>dash.cloudflare.com → R2 → crie o bucket → <code>R2_BUCKET</code>.</li>
+        <li>Em Settings do bucket ative o <b>acesso público</b> (subdomínio r2.dev ou domínio próprio) → <code>R2_PUBLIC_URL</code>.</li>
+        <li>R2 → Manage API tokens → token com leitura e escrita no bucket → <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>; o endpoint S3 <code>https://&lt;account-id&gt;.r2.cloudflarestorage.com</code> → <code>R2_ENDPOINT</code>.</li>
+      </ol></dd>
+      <dt>Uso</dt><dd>Upload com <code>boto3</code> (API compatível com S3). Chave por conta e peça: <code>&lt;conta&gt;/&lt;AAAA-MM-DD-slug&gt;/&lt;arquivo&gt;</code>. Confira com <code>curl -I</code> que a URL responde 200 antes de publicar.</dd>
+      <dt>Por que R2</dt><dd>A Graph API baixa a mídia de uma URL pública; o R2 não cobra tráfego de saída. Os PDFs das entregas de CTA também ficam lá.</dd>
+    </dl>
+  </details>
+
+  <details class="plat">
+    <summary>Cloudflare Workers + D1 <span>o painel publicador</span></summary>
+    <dl>
+      <dt>Peças</dt><dd>Um Worker com assets estáticos (o painel em HTML/JS sem build), API em <code>/api/*</code>, banco D1 (tabelas <code>itens</code>, <code>publicados</code>, <code>eventos</code>, <code>config</code>), binding do R2 e Cron Trigger a cada minuto. Worker e não Pages porque Pages não roda Cron.</dd>
+      <dt>Criar</dt><dd><ol>
+        <li><code>npm i -D wrangler</code> e <code>npx wrangler login</code>.</li>
+        <li><code>npx wrangler d1 create painel-publicador</code> e cole o id no <code>wrangler.toml</code>; aplique <code>schema.sql</code> e as migrações.</li>
+        <li>Ligue o bucket R2 como binding <code>MIDIA</code>.</li>
+        <li>Grave cada segredo com <code>npx wrangler secret put NOME</code> (lista na seção 4).</li>
+        <li><code>npx wrangler deploy</code>. O painel fica em <code>painel-publicador.&lt;sua-conta&gt;.workers.dev</code>.</li>
+      </ol></dd>
+      <dt>Travas de segurança</dt><dd>Duas chaves para publicar: variável <code>PUBLICAR="1"</code> no Worker <b>e</b> interruptor ligado no painel. Senha para o dono; token separado para os agentes, que criam e editam mas nunca aprovam.</dd>
+      <dt>No nosso setup</dt><dd>Código em <code>painel/</code> no repositório; importação de filas com <code>painel/importar_fila.py</code>.</dd>
+    </dl>
+  </details>
+
+  <details class="plat">
+    <summary>ElevenLabs <span>voz clonada</span></summary>
+    <dl>
+      <dt>Criar</dt><dd>elevenlabs.io → plano Starter ou acima (clonagem instantânea) → Voices → Add voice → Instant Voice Clone com 1 a 5 min de áudio limpo seu → Profile → API key → <code>ELEVENLABS_API_KEY</code>. Anote o id da voz.</dd>
+      <dt>Padrão "voz B"</dt><dd>Modelo <code>eleven_v3</code>, endpoint <code>/with-timestamps</code>, stability 0.5, similarity 0.85, style 0.6, speaker boost, speed 1.05. <b>Narração inteira numa chamada só</b>, com no máximo 3 tags de emoção (<code>[animado]</code> no gancho, <code>[impressionado]</code> no dado, <code>[sério]</code> na opinião).</dd>
+      <dt>Armadilhas</dt><dd>O <code>eleven_v3</code> corta a última palavra: some uma cauda curta ("Valeu, e até a próxima.") e corte no último silêncio antes dela (ffmpeg silencedetect). Frase por frase e <code>multilingual_v2</code> soam robóticos. Personagens e robôs usam outra voz, nunca a do dono.</dd>
+      <dt>No nosso setup</dt><dd><code>posts/radar-ia/_natural/</code> (build_natural.py, story_voz.py, voz_cauda.py) e <code>posts/motion-gsap/audio/voz.py</code>.</dd>
+    </dl>
+  </details>
+
+  <details class="plat">
+    <summary>Hugging Face (FLUX) <span>imagens geradas</span></summary>
+    <dl>
+      <dt>Criar</dt><dd>huggingface.co → Settings → Access Tokens → token de leitura → <code>HF_TOKEN</code>.</dd>
+      <dt>Uso</dt><dd><code>gradio_client</code> num Space FLUX (ex.: <code>Client("mcp-tools/FLUX.1-Krea-dev", token=…)</code>, <code>api_name="/infer"</code>). Sem token a cota ZeroGPU estoura.</dd>
+      <dt>Regra</dt><dd>Foto real primeiro (foto do autor, quadro de vídeo real, print com dados fictícios); FLUX é complemento. Quando usar, a legenda leva "Imagens ilustrativas geradas com IA".</dd>
+    </dl>
+  </details>
+
+  <details class="plat">
+    <summary>Apify <span>benchmark e outliers</span></summary>
+    <dl>
+      <dt>Criar</dt><dd>console.apify.com → Settings → Integrations → API token → <code>APIFY_TOKEN</code>. <code>APIFY_TOKENS</code> é uma lista separada por vírgula se você tiver mais de uma conta para rodízio.</dd>
+      <dt>Uso</dt><dd>Atores de scraping do Instagram leem os últimos posts e Reels de uma lista de perfis (<code>posts/ciclo/perfis.txt</code>). O script calcula a <b>razão de outlier</b>: views do post ÷ mediana dos outros posts do mesmo perfil. Acima de 3x vira candidato a formato.</dd>
+      <dt>Ritmo</dt><dd>Segunda, quarta e sexta, uma rodada (~US$ 0,40, ~130 Reels).</dd>
+      <dt>No nosso setup</dt><dd><code>posts/ciclo/outliers_apify.py</code>, <code>ciclo_diario.py</code>, <code>APRENDIZADOS.md</code>, <code>ganchos.csv</code>.</dd>
+    </dl>
+  </details>
+
+  <details class="plat">
+    <summary>Remotion, GSAP, Playwright e ffmpeg <span>vídeo por código</span></summary>
+    <dl>
+      <dt>Remotion</dt><dd>Framework React que renderiza vídeo. Nosso molde <code>posts/remotion-varia</code> recebe um <code>roteiro.json</code> e gera o Reel: cenas de vídeo real (Mixkit, grátis), foto, número, barras, lista, contraste, chat e frase; paletas escuro, marfim e vinho. <code>gerar.py</code> renderiza mudo, mixa voz + trilha + efeitos, normaliza em -14 LUFS e roda o QA. Licença: grátis para pessoa física e empresas pequenas; empresas maiores pagam (conferir remotion.dev/license).</dd>
+      <dt>GSAP + Playwright</dt><dd>Cena em HTML com timeline GSAP pausada e <code>window.seek(t)</code>; o Playwright (Chromium headless) tira quadro a quadro e o ffmpeg monta o MP4. Serve também para carrossel em vídeo. Pasta <code>posts/motion-gsap</code>.</dd>
+      <dt>Carrossel e imagem</dt><dd>HTML 1080×1350 renderizado com Playwright para JPEG (a Graph API só aceita JPEG).</dd>
+      <dt>ffmpeg</dt><dd>Mixagem, ducking da trilha sob a voz, loudness, compressão para WhatsApp, extração de quadros. Instale via apt.</dd>
+      <dt>Doutrina de motion</dt><dd>Skill do projeto <code>skills/motion-omniforge/SKILL.md</code>: curvas com nome (sem spring), manchete por máscara, corte whip, efeitos sonoros automáticos nos cortes.</dd>
+    </dl>
+  </details>
+
+  <details class="plat">
+    <summary>OmniTalk <span>atendimento que entrega o CTA</span></summary>
+    <dl>
+      <dt>Papel</dt><dd>Plataforma omnichannel com agentes de IA. A conta do Instagram está conectada como caixa de entrada: comentários e DMs chegam lá. Um agente lê a lista <code>entregas/entregas.json</code> do GitHub (palavra → link do PDF no R2 + texto do direct), responde em público "Te mandei no direct" e manda o link no privado.</dd>
+      <dt>Replicar</dt><dd>Qualquer plataforma de atendimento com Instagram conectado e agente com ferramenta HTTP serve. O que importa é o contrato: lista de palavras ativa, PDF com URL pública, link só no direct.</dd>
+      <dt>Telas para conteúdo</dt><dd>Gravadas no app real com login de demonstração e dados fictícios, nunca recortadas de conversa de cliente.</dd>
+    </dl>
+  </details>
+
+  <details class="plat">
+    <summary>Claude Code <span>os agentes</span></summary>
+    <dl>
+      <dt>Estrutura</dt><dd><b>Projeto</b> com chat do coordenador e uma <b>thread</b> por frente de trabalho (lote do dia, painel, LinkedIn, notícias, WhatsApp). Cada thread roda num contêiner na nuvem com o repositório clonado e a pasta compartilhada do projeto.</dd>
+      <dt>Ambiente</dt><dd>Acesso de rede "Completo" (ou liberar <code>graph.facebook.com</code>, <code>api.linkedin.com</code>, <code>*.googleapis.com</code>, <code>*.r2.dev</code>, <code>api.elevenlabs.io</code>, <code>api.apify.com</code>). A mudança só vale para sessões novas.</dd>
+      <dt>Rotinas</dt><dd>Gatilhos agendados no servidor (varredura de notícias de madrugada, lote do dia, conferência de correções de hora em hora). Sobrevivem ao reinício do contêiner.</dd>
+      <dt>Memória</dt><dd>Uma nota por assunto com regras e decisões do dono; todo Claude novo lê antes de trabalhar. Espelhada no repositório em <code>memoria/</code>.</dd>
+      <dt>Skills</dt><dd>Instruções reutilizáveis: motion, storytelling, LinkedIn em pt-BR. Referência que o dono manda para "aprender" vira skill, não post.</dd>
+    </dl>
+  </details>
+
+  <details class="plat">
+    <summary>Fontes livres e ferramentas de apoio <span>sem chave</span></summary>
+    <dl>
+      <dt>Vídeo</dt><dd>Mixkit (catálogo em <code>remotion-varia/catalogo.json</code>, ids usados nos últimos 30 dias são recusados). Material suplementar CC BY de artigos científicos.</dd>
+      <dt>Fotos</dt><dd>API do Openverse (CC0 e CC BY com crédito). Unsplash, Pexels e Wikimedia bloqueiam IP de datacenter.</dd>
+      <dt>Radar de links</dt><dd>SearXNG rodando no contêiner (Google CSE, Bing News em inglês, Hacker News, YouTube, GitHub). Complementa a busca; não lê Instagram.</dd>
+      <dt>No computador</dt><dd>yt-dlp para baixar referências; Concat (editor com MCP) para montagem final de vídeo real. Downloads rodam no PC, não na nuvem.</dd>
+    </dl>
+  </details>
+</section>
+
+<!-- 3b -->
+<section id="locais">
+  <h2>Ferramentas que rodam local</h2>
+  <p class="kicker">Sem API paga: instaladas no contêiner da nuvem (onde os agentes trabalham) ou no computador do dono</p>
+  <p>Tudo aqui é gratuito e de código aberto. O contêiner do Claude Code é recriado com frequência, então o que não vem instalado precisa entrar no <b>setup script do ambiente</b> (ou ser reinstalado no começo da tarefa).</p>
+
+  <h3>Vídeo e áudio</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Ferramenta</th><th>Para que usamos</th><th>Onde roda</th><th>Instalar</th></tr></thead>
+    <tbody>
+      <tr><td>ffmpeg / ffprobe</td><td>O canivete da operação: junta voz + trilha + efeitos, ducking da trilha sob a voz, normaliza em -14 LUFS (<code>loudnorm</code>), acha o fim da fala (<code>silencedetect</code>), corta, redimensiona para 9:16, comprime para o WhatsApp (<code>-crf 26 -maxrate 2500k</code>), tira quadros para revisão, tratamento de rosto (<code>smartblur</code>, <code>eq</code>, <code>unsharp</code>)</td><td>Nuvem e PC</td><td><code>apt install ffmpeg</code></td></tr>
+      <tr><td>Node.js + npm/npx</td><td>Base do Remotion, do Playwright, dos renders GSAP e do <code>wrangler</code></td><td>Nuvem e PC</td><td>nodejs.org (LTS) ou nvm</td></tr>
+      <tr><td>Remotion</td><td>Reel em React a partir de roteiro.json (pacotes <code>remotion</code>, <code>@remotion/cli</code>, <code>@remotion/renderer</code>, <code>@remotion/bundler</code>, <code>@remotion/media-utils</code>, React 19)</td><td>Nuvem</td><td><code>npm i</code> na pasta do molde</td></tr>
+      <tr><td>Playwright + Chromium headless</td><td>Fotografa HTML: slides de carrossel 1080×1350, capas, cenas GSAP quadro a quadro; grava telas do app com dados fictícios</td><td>Nuvem e PC</td><td><code>npm i playwright</code> + <code>npx playwright install chromium</code> (na nuvem do Claude já vem)</td></tr>
+      <tr><td>GSAP</td><td>Animação das cenas em HTML (timeline pausada + <code>window.seek</code>)</td><td>Nuvem</td><td><code>npm i gsap</code> (grátis, inclusive plugins)</td></tr>
+      <tr><td>numpy</td><td>Efeitos sonoros sintetizados (whoosh, tick, pop, shimmer) e trilhas originais sem direito autoral</td><td>Nuvem</td><td><code>pip install numpy</code></td></tr>
+      <tr><td>rembg + onnxruntime</td><td>Recorte da pessoa em foto (modelos birefnet-portrait, isnet-general-use) para trocar o fundo</td><td>Nuvem</td><td><code>pip install rembg onnxruntime</code></td></tr>
+      <tr><td>RobustVideoMatting (ONNX)</td><td>Recorte da pessoa em vídeo, quadro a quadro na CPU</td><td>Nuvem</td><td>modelo .onnx do release no GitHub</td></tr>
+      <tr><td>Whisper</td><td>Transcrever vídeo real, gerar legenda com tempo, conferir se a narração saiu inteira</td><td>Nuvem e PC</td><td><code>pip install openai-whisper</code> ou faster-whisper</td></tr>
+      <tr><td>yt-dlp</td><td>Baixar vídeos de referência para estudo</td><td>PC (IP residencial; na nuvem é bloqueado)</td><td><code>pip install yt-dlp</code></td></tr>
+      <tr><td>Concat</td><td>Editor de vídeo aberto com servidor MCP: o Claude monta cortes, títulos e legendas de vídeo real</td><td>PC</td><td>compilar do código (Rust); registrar no <code>.mcp.json</code></td></tr>
+      <tr><td>Chatterbox (opcional)</td><td>TTS local testado como alternativa à ElevenLabs; ficou atrás da voz clonada</td><td>Nuvem (CPU)</td><td><code>pip install chatterbox-tts</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Python e automação</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Ferramenta</th><th>Para que usamos</th><th>Instalar</th></tr></thead>
+    <tbody>
+      <tr><td>Python 3</td><td>Todos os publicadores, o ciclo de benchmark, checadores de repetição, importador do painel (só biblioteca padrão na maioria: <code>urllib</code>, <code>json</code>, <code>base64</code>, <code>subprocess</code>)</td><td>já vem no Linux</td></tr>
+      <tr><td>boto3</td><td>Subir mídia e PDFs ao R2 (API S3)</td><td><code>pip install boto3</code></td></tr>
+      <tr><td>gradio_client</td><td>Chamar Spaces do Hugging Face: FLUX (imagem) e LatentSync (sincronia labial)</td><td><code>pip install gradio_client</code></td></tr>
+      <tr><td>Pillow</td><td>Ajustes de imagem, conversão para JPEG, montagem de mural de quadros</td><td><code>pip install pillow</code></td></tr>
+      <tr><td>SearXNG</td><td>Metabuscador próprio: radar de ~120 links por dia sem chave</td><td><code>git clone</code> + venv (script <code>posts/ciclo/searxng/setup.sh</code>), sem Docker</td></tr>
+      <tr><td>wrangler</td><td>Deploy do painel, banco D1, segredos do Worker</td><td><code>npm i -D wrangler</code></td></tr>
+      <tr><td>git</td><td>Espelho no GitHub, branches e PRs das threads</td><td>já vem</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="skills-video">Skills de vídeo para o Claude Code</h3>
+  <p>Na pasta <code>ferramentas/skills-video/</code> ficam pacotes de skills de código aberto, baixados do GitHub (cada .zip é o repositório). Skill é uma pasta com um <code>SKILL.md</code> que ensina o Claude a fazer uma tarefa. <b>Para instalar:</b> descompacte e copie cada pasta que tem <code>SKILL.md</code> para <code>.claude/skills/&lt;nome&gt;/</code> do projeto, ou para <code>~/.claude/skills/</code> para valer em todos os projetos. O Claude passa a usar sozinho quando o pedido combina com a descrição da skill.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Pacote</th><th>O que faz</th><th>Skills dentro</th><th>Precisa de</th><th>Licença</th><th>Uso</th></tr></thead>
+    <tbody>
+      <tr><td>remotion-skills</td><td>Skills oficiais do Remotion: o motor dos nossos Reels</td><td>remotion-create, remotion-best-practices, remotion-render, remotion-studio, remotion-captions, remotion-multimedia, remotion-markup, remotion-maps, remotion-saas, remotion-interactivity, remotion-docs, remotion-upgrade</td><td>Node</td><td>ver repositório</td><td><span class="pill ok">instalar já</span></td></tr>
+      <tr><td>hyperframes-skills</td><td>HTML + GSAP vira MP4, com formatos prontos de vídeo</td><td>hyperframes, hyperframes-core, hyperframes-cli, hyperframes-studio, hyperframes-animation, hyperframes-keyframes, hyperframes-audio, hyperframes-creative, hyperframes-registry, faceless-explainer, talking-head-recut, embedded-captions, product-launch-video, pr-to-video, music-to-video, slideshow, motion-graphics, general-video, media-use, figma, remotion-to-hyperframes</td><td>Node, Chrome, ffmpeg (<code>npx hyperframes</code>)</td><td>Apache 2.0</td><td><span class="pill ok">instalar</span></td></tr>
+      <tr><td>video-use</td><td>Edita vídeo bruto conversando: corta silêncio, legenda, cor, sobreposições; inclui animação didática com Manim</td><td>video-use, manim-video</td><td>ffmpeg, Python, ElevenLabs (Scribe transcreve)</td><td>MIT</td><td><span class="pill ok">bom para vídeo falado</span></td></tr>
+      <tr><td>claude-animation-base</td><td>Personagem animado à mão (p5.js), storyboard e QA sozinho</td><td>projeto base (sem SKILL.md único)</td><td>Node, Chrome, ffmpeg; GPU ajuda</td><td>MIT</td><td><span class="pill ok">esquete e humor</span></td></tr>
+      <tr><td>lemo-opuscar</td><td>Curtas inteiros em código em estilos de arte (óleo, aquarela, ukiyo-e, quadro branco)</td><td>lemo-opuscar</td><td>Node, Python</td><td>MIT</td><td><span class="pill warn">pesado (85 MB)</span></td></tr>
+      <tr><td>collage-broll</td><td>B-roll de colagem de papel a partir de uma frase</td><td>collage-broll</td><td>chave paga do Gemini; instruções em chinês</td><td>MIT</td><td><span class="pill warn">opcional</span></td></tr>
+      <tr><td>onetake</td><td>Vídeo de produto de 10 a 30 s com tipografia cinética e UI real</td><td>onetake</td><td>Python, Playwright</td><td>PolyForm Noncommercial</td><td><span class="pill bad">só estudo, nunca em post</span></td></tr>
+      <tr><td>superpowers</td><td>Fluxo de desenvolvimento com agentes (não é de vídeo)</td><td>brainstorming, writing-plans, executing-plans, subagent-driven-development, dispatching-parallel-agents, systematic-debugging, test-driven-development, verification-before-completion, requesting-code-review, receiving-code-review, using-git-worktrees, finishing-a-development-branch, writing-skills, using-superpowers, diagnosing-superpowers</td><td>nada</td><td>MIT</td><td><span class="pill ok">para quem programa</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <p>Na subpasta <code>extra/</code> ficam pacotes complementares:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Pacote</th><th>Skills dentro</th><th>Para quê</th><th>Uso</th></tr></thead>
+    <tbody>
+      <tr><td>instalar-agora</td><td>cut-video, clipify, claude-shorts, watch, b-roll-finder, video-thumbnail</td><td>Tirar silêncio e vício de fala; vídeo longo em cortes 9:16 com legenda; o Claude "assistir" um vídeo (quadros + transcrição); achar B-roll; capa com rosto e logo</td><td><span class="pill ok">já instaladas no PC</span></td></tr>
+      <tr><td>claude-code-video-toolkit</td><td>remotion, remotion-official, ffmpeg, moviepy, elevenlabs, playwright-recording, frontend-design, ltx2, qwen-edit, ideogram4, acestep, runpod, openclaw-video-toolkit</td><td>Fluxo completo: roteiro, voz, gravação de tela, Remotion; geração de imagem, vídeo e música por modelos abertos (GPU na RunPod)</td><td><span class="pill warn">repete skills do Remotion</span></td></tr>
+      <tr><td>extras-gerar-video</td><td>video-perception; omnicaptions (transcribe, translate, convert, download, LaiCut); make-a-video, text-to-video, image-to-video, explainer-video, youtube-short-maker, video-ad, tiktok-video-ad, product-video, launch-video, saas-video, startup-video, founder-video, veo-3.2-prompter, seedance-2.0-prompter, videoagent (director, audio, image, video studio); higgsfield (generate, soul-id, video-explainer, youtube-thumbnail, brandkit, product-photoshoot, marketplace-cards, websites); motion-graphics, cartoon-broll, convex-thumbnail, deslop, ship; audio-editing</td><td>Legendas e tradução; geração de vídeo por IA e prompts para Veo e Seedance; motion graphics; edição de áudio</td><td><span class="pill warn">várias dependem de serviço pago</span></td></tr>
+      <tr><td>video-shotcraft</td><td>video-shotcraft</td><td>Site ou app vira vídeo de produto cinematográfico em Remotion</td><td><span class="pill ok">MIT/Apache, 67 MB</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><b>Kit da turma:</b> o arquivo <code>kit-skills-mentoria.zip</code> (14 MB) traz 44 skills prontas para copiar em <code>.claude/skills/</code>, cada uma com a sua licença, mais um LEIA-ME com a instalação. As do Remotion entram pelo comando oficial <code>npx skills add remotion-dev/skills</code>.</div>
+  <div class="note"><b>Antes de instalar uma skill de terceiros:</b> leia o <code>SKILL.md</code> e os scripts que ela roda, confira a licença (uso comercial?) e veja se pede chave de serviço pago. Skill é instrução que o agente segue com as suas permissões.</div>
+
+  <h3>No computador do dono</h3>
+  <ul>
+    <li><b>Claude Desktop / Claude Code</b> com uma pasta do projeto liberada para a nuvem ler e gravar arquivos.</li>
+    <li><b>Remote Control</b>: uma sessão do Claude roda no PC para tarefas que exigem a máquina (download, gravar segredo no Worker, edição pesada).</li>
+    <li><b>Servidores MCP locais</b>: Concat (edição de vídeo) e um MCP de acesso ao desktop para ler arquivos e rodar comandos.</li>
+    <li><b>yt-dlp e ffmpeg</b> instalados no PC, porque sites de vídeo bloqueiam IP de datacenter.</li>
+  </ul>
+
+  <h3>Setup script mínimo para a nuvem</h3>
+<pre><code>apt-get update &amp;&amp; apt-get install -y ffmpeg
+pip install boto3 gradio_client pillow numpy rembg onnxruntime
+npm i -g wrangler
+# Remotion: cd posts/remotion-varia &amp;&amp; npm i
+# gerar config/meta.env a partir das variáveis do ambiente
+mkdir -p config &amp;&amp; env | grep -E '^(META_|IG_|YT_|LINKEDIN_|WAHA_|R2_|AWS_|ELEVENLABS_|HF_|APIFY_)' &gt; config/meta.env</code></pre>
+</section>
+
+<!-- 4 -->
+<section id="variaveis">
+  <h2>Variáveis e segredos</h2>
+  <p class="kicker">Um arquivo só, carregado por todos os scripts</p>
+  <p>Todos os scripts leem <code>config/meta.env</code> com <code>set -a; . config/meta.env; set +a</code>. O arquivo fica fora do git. Use este modelo como <code>.env.example</code> da turma:</p>
+<pre><code># ---- Meta / Instagram ----
+META_APP_ID=
+META_APP_SECRET=
+META_USER_ID=
+META_USER_ACCESS_TOKEN=          # longa duração, 60 dias
+META_PAGE_ID_&lt;CONTA&gt;=            # uma linha por Página
+META_PAGE_TOKEN_&lt;CONTA&gt;=         # token de página, não expira
+IG_BUSINESS_ID_&lt;CONTA&gt;=          # id da conta IG ligada à Página
+
+# ---- YouTube ----
+YT_CLIENT_ID=
+YT_CLIENT_SECRET=
+YT_REFRESH_TOKEN=
+
+# ---- LinkedIn ----
+LINKEDIN_CLIENT_ID=
+LINKEDIN_CLIENT_SECRET=
+LINKEDIN_ACCESS_TOKEN=
+LINKEDIN_ACCESS_EXPIRES=
+LINKEDIN_REFRESH_TOKEN=
+LINKEDIN_REFRESH_EXPIRES=
+LINKEDIN_PERSON_URN=
+
+# ---- WhatsApp (WAHA) ----
+WAHA_URL=
+WAHA_SESSION=
+WAHA_API_KEY=
+
+# ---- Cloudflare R2 (API S3) ----
+R2_ENDPOINT=
+R2_BUCKET=
+R2_PUBLIC_URL=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+
+# ---- IA e dados ----
+ELEVENLABS_API_KEY=
+HF_TOKEN=
+APIFY_TOKEN=
+APIFY_TOKENS=                    # opcional: várias contas, separadas por vírgula
+OPENAI_API_KEY=
+JEV_API_KEY=                     # classificador de texto (opcional)
+
+# ---- Plataforma de atendimento (opcional) ----
+OMNITALK_DEMO_URL=
+OMNITALK_DEMO_EMAIL=
+OMNITALK_DEMO_SENHA=</code></pre>
+
+  <h3>Segredos do Worker do painel</h3>
+  <p>Gravados com <code>npx wrangler secret put</code>, nunca no <code>wrangler.toml</code>:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Nome</th><th>Para quê</th><th>De onde vem</th></tr></thead>
+    <tbody>
+      <tr><td><code>PAINEL_SENHA</code></td><td>Login do dono no painel</td><td>Você define</td></tr>
+      <tr><td><code>PAINEL_SEGREDO</code></td><td>Assinar o cookie de sessão</td><td>Texto aleatório longo</td></tr>
+      <tr><td><code>PAINEL_TOKEN</code></td><td>Agentes criam e editam itens (não aprovam)</td><td>Texto aleatório longo</td></tr>
+      <tr><td><code>IG_ID_&lt;CONTA&gt;</code>, <code>IG_TOKEN_&lt;CONTA&gt;</code></td><td>Publicar em cada conta</td><td><code>IG_BUSINESS_ID_*</code> e <code>META_PAGE_TOKEN_*</code></td></tr>
+      <tr><td><code>YT_CLIENT_ID</code>, <code>YT_CLIENT_SECRET</code>, <code>YT_REFRESH_TOKEN</code></td><td>Shorts</td><td>Mesmos do .env</td></tr>
+      <tr><td><code>LINKEDIN_CLIENT_ID</code>, <code>LINKEDIN_CLIENT_SECRET</code>, <code>LINKEDIN_REFRESH_TOKEN</code>, <code>LINKEDIN_PERSON_URN</code></td><td>LinkedIn (o Worker renova o token)</td><td>Mesmos do .env</td></tr>
+      <tr><td><code>WAHA_URL</code>, <code>WAHA_SESSION</code>, <code>WAHA_API_KEY</code></td><td>Alertas e status</td><td>Mesmos do .env</td></tr>
+    </tbody>
+  </table></div>
+  <p>Variáveis comuns (não secretas) no <code>wrangler.toml</code>: <code>PUBLICAR</code> ("0" ou "1"), <code>R2_PUBLIC_URL</code>, <code>GRUPO_WHATS</code> (id do grupo que recebe alertas).</p>
+  <div class="note"><b>Regra de ouro:</b> nunca cole valor de chave no chat do Claude, em commit, log, memória ou post. Quem grava segredo no Worker é o dono, no próprio terminal.</div>
+</section>
+
+<!-- 5 -->
+<section id="pastas">
+  <h2>Pastas e repositório</h2>
+  <p class="kicker">Onde cada coisa mora</p>
+  <div class="grid2">
+    <div class="card"><h4>Pasta compartilhada do projeto</h4><p><code>/mnt/project-files/</code>: vista por todas as threads, sobrevive a elas.</p></div>
+    <div class="card"><h4>Repositório GitHub privado</h4><p>Espelho da pasta + memória + código do painel. Sem Actions nem LFS, para custo zero. As threads trabalham em branches e abrem PR.</p></div>
+    <div class="card"><h4>Pasta no computador</h4><p>Pasta local do projeto (downloads com yt-dlp, edição no Concat, scripts que precisam de rede residencial).</p></div>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Caminho</th><th>Conteúdo</th></tr></thead>
+    <tbody>
+      <tr><td><code>config/meta.env</code></td><td>Todas as credenciais (fora do git)</td></tr>
+      <tr><td><code>analises/</code></td><td>Diagnósticos, estudo de mercado, benchmarks, <code>AAAA-MM-DD-noticias-do-dia.md</code>, <code>AAAA-MM-DD-ciclo.md</code></td></tr>
+      <tr><td><code>posts/jesse/</code>, <code>posts/radar-ia/</code></td><td>Peças do perfil pessoal, uma pasta por peça (roteiro.json, legenda.md, capa, slides, qa.txt) e as filas <code>fila-AAAA-MM-DD.json</code></td></tr>
+      <tr><td><code>posts/radar-ia/_producao/</code></td><td><code>REGRAS.md</code> que todo agente produtor segue, <code>fila_add.py</code>, <code>importar.sh</code>, <code>teaser.sh</code></td></tr>
+      <tr><td><code>posts/radar-ia/_modelos/</code></td><td>Modelos de post (print-real, texto-ensaio)</td></tr>
+      <tr><td><code>posts/radar-ia/_natural/</code></td><td>Voz B: configuração e geradores</td></tr>
+      <tr><td><code>posts/omniforgebr/</code></td><td>Peças do perfil da empresa</td></tr>
+      <tr><td><code>posts/remotion-varia/</code></td><td>Molde de Reel em Remotion (gerar.py, LEIA-ME, catálogo Mixkit)</td></tr>
+      <tr><td><code>posts/motion-gsap/</code></td><td>Motion em HTML+GSAP, áudio (sfx, mix, qa, voz)</td></tr>
+      <tr><td><code>posts/ciclo/</code></td><td>Benchmark e aprendizado: outliers, ganchos, resultados, SearXNG</td></tr>
+      <tr><td><code>posts/whatsapp/</code></td><td>Status, alertas, pauta e aprovação pelo WhatsApp</td></tr>
+      <tr><td><code>posts/publish_*.py</code></td><td>Publicadores avulsos por rede</td></tr>
+      <tr><td><code>entregas/</code></td><td><code>entregas.json</code> (palavra → PDF), um subdiretório por CTA, <code>ORIENTACAO-AGENTE.md</code></td></tr>
+      <tr><td><code>linkedin/</code></td><td>Como conectar, regras de adaptação, plano, um subdiretório por post, skills /li-*</td></tr>
+      <tr><td><code>calendario/</code></td><td>Calendários editoriais (ex.: 30 peças "Agentes de IA na Prática")</td></tr>
+      <tr><td><code>marca/</code></td><td>Kit oficial de logo e identidade</td></tr>
+      <tr><td><code>skills/</code></td><td>Skills do projeto (motion, storytelling e outras)</td></tr>
+      <tr><td><code>export/</code></td><td>HANDOFF.md, PUBLICAR.md, calendário: passagem para outro Claude</td></tr>
+      <tr><td>repo <code>painel/</code></td><td>Worker, schema D1, migrações, importador</td></tr>
+      <tr><td>repo <code>memoria/</code></td><td>Cópia da memória do projeto</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">A pasta compartilhada é um disco de rede. Não grave MP4 grande lá: trabalhe em <code>/tmp</code>, suba o vídeo direto para o R2 e guarde na pasta só roteiro, legenda, capa e QA.</div>
+</section>
+
+<!-- 6 -->
+<section id="scripts">
+  <h2>Scripts</h2>
+  <p class="kicker">O que cada um faz</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Script</th><th>Função</th><th>Quem roda</th></tr></thead>
+    <tbody>
+      <tr><td><code>posts/publish_ig.py</code></td><td>Carrossel, imagem e story pela Graph API</td><td>Manual / legado</td></tr>
+      <tr><td><code>posts/publish_reel.py</code></td><td>Reel (video_url do R2 + capa)</td><td>Manual / legado</td></tr>
+      <tr><td><code>posts/publish_collab.py</code></td><td>Post em collab entre contas</td><td>Manual</td></tr>
+      <tr><td><code>posts/publish_youtube.py</code></td><td>Short por upload resumível</td><td>Manual (o painel faz o automático)</td></tr>
+      <tr><td><code>posts/publish_linkedin.py</code></td><td>Texto, imagem, vídeo, PDF; renova token</td><td>Manual (o painel faz o automático)</td></tr>
+      <tr><td><code>remotion-varia/gerar.py</code></td><td>Reel completo a partir de roteiro.json, com voz, trilha, SFX e QA</td><td>Agente produtor</td></tr>
+      <tr><td><code>motion-gsap/render.mjs</code>, <code>slide.mjs</code></td><td>Cena GSAP → MP4; vídeo → slide de carrossel</td><td>Agente produtor</td></tr>
+      <tr><td><code>radar-ia/checar_repeticao.py</code></td><td>Tema já feito nos últimos 14 dias? (sai 1 se sim)</td><td>Todo agente, antes de produzir</td></tr>
+      <tr><td><code>ciclo/temas_usados.py</code></td><td>Mesma checagem nas pautas e notícias antigas</td><td>Todo agente, antes da pauta</td></tr>
+      <tr><td><code>radar-ia/_producao/fila_add.py</code></td><td>Põe uma peça na fila do dia</td><td>Agente produtor</td></tr>
+      <tr><td><code>painel/importar_fila.py</code></td><td>Sobe mídia ao R2 e cria os itens "aguardando" no painel</td><td>Thread do painel</td></tr>
+      <tr><td><code>ciclo/ciclo_diario.py</code></td><td>Briefing do dia: outliers, resultados, aprendizados</td><td>Rotina da madrugada</td></tr>
+      <tr><td><code>ciclo/outliers_apify.py</code></td><td>Outliers de perfis de referência</td><td>Seg/qua/sex</td></tr>
+      <tr><td><code>ciclo/resultados.py</code></td><td>Views dos nossos posts ÷ mediana; cruza com ganchos.csv</td><td>Rotina</td></tr>
+      <tr><td><code>whatsapp/status_waha.py</code></td><td>Status do WhatsApp com checagem de duplicado</td><td>Legado (agora no painel)</td></tr>
+      <tr><td><code>whatsapp/avisar_sem_sim.py</code></td><td>Alerta quando chega a hora sem aprovação</td><td>Legado (agora no painel)</td></tr>
+      <tr><td><code>whatsapp/pauta_whats.py</code></td><td>Manda o resumo de notícias ao grupo</td><td>Rotina de notícias</td></tr>
+      <tr><td><code>entregas/responder.py</code></td><td>Plano B de entrega de CTA pela Graph API</td><td>Desligado</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 7 -->
+<section id="pipeline">
+  <h2>Pipeline: produção, aprovação, publicação</h2>
+  <p class="kicker">Estados de cada peça e quem age em cada etapa</p>
+  <ol class="steps">
+    <li><b>Pauta.</b> A rotina de notícias grava o arquivo do dia com as melhores marcadas. Antes de virar pauta, cada tema passa pelos dois checadores de repetição.</li>
+    <li><b>Roteiro.</b> O agente escreve 3 ganchos (POV/humor, número/resultado, pergunta/contraste), escolhe um e registra os três em <code>ganchos.csv</code>. CTA sempre concreto: "comenta PALAVRA", com palavra nova.</li>
+    <li><b>Produção.</b> Reel pelo molde Remotion (30 a 45 s, voz B, -14 LUFS, QA aprovado); carrossel 1080×1350 em HTML; capa 1080×1920. Mídia sobe ao R2.</li>
+    <li><b>Entrega do CTA.</b> PDF sem dados pessoais do autor, no R2, cadastrado em <code>entregas.json</code> como inativo.</li>
+    <li><b>Fila e painel.</b> A peça entra na fila do dia e é importada no painel como <span class="pill warn">aguardando</span>.</li>
+    <li><b>Aprovação.</b> O dono clica Aprovar (ou "Aprovar o dia", ou "Pedir correção"). Ao aprovar, o painel guarda o etag de cada arquivo: se a mídia mudar depois, a peça pausa sozinha.</li>
+    <li><b>Publicação.</b> O Cron confere teto do dia, 60 min desde o último feed, md5 e legenda contra o que já saiu, e publica. Estados: <span class="pill ok">publicado</span> ou <span class="pill bad">pausado / atrasado / pulado / erro</span>.</li>
+    <li><b>Desdobramentos.</b> Reel vai ao YouTube Shorts; item marcado vai ao status do WhatsApp; post do LinkedIn sai no horário dele.</li>
+    <li><b>Ativar a entrega.</b> Depois de publicado, a palavra fica ativa em <code>entregas.json</code> e o agente de atendimento passa a responder.</li>
+    <li><b>Medir.</b> As views entram em <code>resultados.py</code>; padrão que se repete em 2 ou mais posts vira linha em <code>APRENDIZADOS.md</code> e muda o lote seguinte.</li>
+  </ol>
+</section>
+
+<!-- 8 -->
+<section id="rotina">
+  <h2>Rotina diária</h2>
+  <p class="kicker">Horários de Brasília</p>
+  <div class="timeline">
+    <span class="t">05h12</span><span>Varredura de notícias de IA por região, resumo no grupo do WhatsApp.</span>
+    <span class="t">05h47</span><span>Lote do dia: briefing do ciclo, pauta checada, produção das peças.</span>
+    <span class="t">manhã</span><span>Stories e notícias do dia, mesmo que os Reels já estejam aprovados.</span>
+    <span class="t">12h00</span><span>Post de feed (carrossel ou imagem).</span>
+    <span class="t">16h00</span><span>Meme do dia, com foto real.</span>
+    <span class="t">21h00</span><span>Reel principal (+ Short no YouTube).</span>
+    <span class="t">21h15</span><span>Story chamando para o Reel.</span>
+    <span class="t">noite</span><span>Preparar e pedir aprovação dos horários do dia seguinte.</span>
+    <span class="t">1 em 1 h</span><span>Conferência de correções pedidas no painel.</span>
+  </div>
+  <p>Teto no perfil pessoal: <b>3 feed + 1 meme por dia</b>, mínimo de 60 min entre posts de feed. LinkedIn: 3 posts por semana, terça a quinta, 8h às 10h.</p>
+</section>
+
+<!-- 9 -->
+<section id="regras">
+  <h2>Regras e armadilhas aprendidas</h2>
+  <p class="kicker">Cada uma custou um erro real</p>
+  <h3>Governança</h3>
+  <ul>
+    <li><b>Um único publicador por conta.</b> Dois agentes publicando sem saber um do outro geraram 7 posts num dia. Agentes produzem; só o painel publica.</li>
+    <li><b>Nada sai sem o "sim" do dono</b>, e o "sim" só vale no canal combinado (o clique no painel). O token dos agentes cria e edita, nunca aprova.</li>
+    <li><b>Hora chegou sem aprovação: avisar, nunca ficar em silêncio.</b> Um dia inteiro ficou sem post porque o lote esperou um "sim" que o dono não viu.</li>
+    <li><b>Atrasado não sai em rajada.</b> Passou 90 min: precisa de novo horário e novo Aprovar.</li>
+    <li><b>Anti-repetição é rotina.</b> Tema repetido e story publicado duas vezes. Hoje: checagem de tema antes da pauta, md5 da mídia e legenda contra os últimos 24 posts antes de publicar. O "Publicar agora" em itens antigos duplicou posts porque eles não estavam no histórico.</li>
+    <li><b>Uma peça, um dono.</b> Duas sessões refizeram a mesma peça e uma sobrescreveu a outra no R2.</li>
+  </ul>
+  <h3>Conteúdo</h3>
+  <ul>
+    <li>Nunca nomear concorrentes ou outros criadores; referência é só estudo. Fornecedores de IA podem ser citados.</li>
+    <li>Nunca prometer o que o produto ainda não faz.</li>
+    <li>Todo número com fonte; notícia confirmada em 2 fontes.</li>
+    <li>Dados de clientes só anonimizados e com autorização; nunca nomear o cliente.</li>
+    <li>Variar formato e gancho; nunca abrir todo Reel igual. Vídeo real e bastidor alcançam mais que notícia narrada sobre fundo animado.</li>
+    <li>Infográfico denso e rico; carrossel com foto real, mãozinha de "arrasta" na capa e CTA no último slide.</li>
+    <li>CTA que promete material precisa da entrega pronta antes de publicar.</li>
+    <li>Material que o dono manda para estudo é lido inteiro antes de usar.</li>
+  </ul>
+  <h3>Técnicas</h3>
+  <ul>
+    <li>Graph API: só JPEG em imagem, só URL pública, vídeo precisa esperar <code>FINISHED</code>.</li>
+    <li>Mudança de rede do ambiente só vale para sessões novas.</li>
+    <li>A voz <code>eleven_v3</code> corta o fim: cauda + corte no silêncio. Trilha com ducking, nunca volume fixo.</li>
+    <li>WhatsApp: vídeo acima de ~16 MB falha; duas execuções no mesmo minuto duplicam.</li>
+    <li>Pasta de rede perde escrita em reinício: MP4 vai para o R2, não para a pasta.</li>
+    <li>Tokens: page token derivado de token longo não expira; LinkedIn ~60 dias (com refresh ~1 ano); YouTube em modo teste expira em 7 dias.</li>
+  </ul>
+</section>
+
+<!-- 10 -->
+<section id="zero">
+  <h2>Replicar do zero</h2>
+  <p class="kicker">Roteiro para o aluno, na ordem em que as dependências aparecem</p>
+  <ol class="steps">
+    <li><b>Contas.</b> Instagram profissional ligado a uma Página do Facebook; canal do YouTube; perfil no LinkedIn com uma Página de empresa; conta Cloudflare; conta GitHub.</li>
+    <li><b>Repositório e arquivo de segredos.</b> Crie um repositório privado com <code>.gitignore</code> incluindo <code>config/meta.env</code>. Copie o modelo da seção 4.</li>
+    <li><b>R2.</b> Bucket, acesso público, token S3. Teste: suba um JPEG com boto3 e abra a URL.</li>
+    <li><b>Meta.</b> App tipo Empresa, permissões, token longo, token de página e id da conta IG. Teste: <code>GET /{ig-id}?fields=username</code>.</li>
+    <li><b>Primeiro post manual.</b> Contêiner com a URL do R2 → <code>media_publish</code>. Se saiu, o caminho mais difícil está pronto.</li>
+    <li><b>Voz.</b> Clone a voz no ElevenLabs, gere 30 s com <code>eleven_v3</code> numa chamada só, ouça o fim.</li>
+    <li><b>Vídeo por código.</b> Instale Node, ffmpeg e Playwright; renderize um Reel de teste com Remotion ou uma cena GSAP; mixe com a voz.</li>
+    <li><b>Claude Code.</b> Crie o projeto, conecte o GitHub, ambiente com rede completa e um setup que gera <code>config/meta.env</code> a partir das variáveis do ambiente. Escreva a memória inicial: público, tom, regras, o que nunca dizer.</li>
+    <li><b>Regras de produção.</b> Um <code>REGRAS.md</code> que todo agente lê: escopo (produz, não publica), checagem de repetição, formatos, CTA, QA.</li>
+    <li><b>Painel.</b> Worker + D1 + Cron, segredos gravados por você, <code>PUBLICAR="0"</code> até testar. Teste com um item, aprove, ligue as duas chaves.</li>
+    <li><b>Outras redes.</b> YouTube (OAuth + refresh token, app em produção) e LinkedIn (app com Página, token). Ligue no painel.</li>
+    <li><b>WhatsApp.</b> WAHA numa VPS para alertas e status. Sem isso, alertas por e-mail ou push já resolvem.</li>
+    <li><b>Entrega de CTA.</b> PDF no R2, lista palavra → link, agente de atendimento com Instagram conectado.</li>
+    <li><b>Rotinas.</b> Varredura de madrugada, lote do dia, conferência de correções. Comece com uma e aumente.</li>
+    <li><b>Ciclo de aprendizado.</b> Apify em 10 a 20 perfis de referência, razão de outlier, resultados dos próprios posts, arquivo de aprendizados lido pelo lote.</li>
+  </ol>
+  <div class="note"><b>Ordem mínima para a primeira semana:</b> passos 1 a 5 e 8 a 10. Com isso o aluno já produz com agentes e publica com aprovação. O resto melhora alcance e escala.</div>
+</section>
+
+<!-- 11 -->
+<section id="custos">
+  <h2>Custos e limites</h2>
+  <p class="kicker">Valores do nosso uso; confira a tabela atual de cada fornecedor</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Item</th><th>Plano / custo</th><th>Limite que importa</th></tr></thead>
+    <tbody>
+      <tr><td>Meta Graph API</td><td>Grátis</td><td>Cota de publicação por 24 h por conta (consulte <code>GET /{ig-id}/content_publishing_limit</code>); limite de chamadas por hora</td></tr>
+      <tr><td>YouTube Data API</td><td>Grátis</td><td>10 mil unidades/dia por padrão; upload consome boa parte</td></tr>
+      <tr><td>LinkedIn API</td><td>Grátis</td><td>Só publicação com <code>w_member_social</code></td></tr>
+      <tr><td>Cloudflare R2 + Workers + D1</td><td>Plano grátis atende este volume</td><td>Armazenamento e operações do R2; requisições e tempo de CPU do Worker</td></tr>
+      <tr><td>ElevenLabs</td><td>Starter</td><td>90 mil caracteres/mês: um Reel de 40 s usa ~600</td></tr>
+      <tr><td>Apify</td><td>Por uso</td><td>~US$ 0,40 por rodada de ~130 Reels</td></tr>
+      <tr><td>Hugging Face</td><td>Grátis com token</td><td>Cota de GPU dos Spaces</td></tr>
+      <tr><td>WAHA</td><td>Servidor próprio</td><td>Número não oficial: volume moderado</td></tr>
+      <tr><td>GitHub</td><td>Grátis</td><td>Sem Actions e sem LFS para não gerar custo</td></tr>
+      <tr><td>Claude</td><td>Assinatura</td><td>Limites de uso do plano</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>
+  Material preparado para a mentoria de 20/10/2026. Sem credenciais, IDs de conta ou dados de clientes. Para o setup real, cada valor fica no arquivo de segredos de quem replica.
+</footer>
+</main>
+</div>
