@@ -36,3 +36,63 @@ If you created or enabled a skill in your web or desktop Claude account, it will
 2. Type `/plugin` and press Enter to open the plugin browser.
 3. Navigate to the **Discover** tab and select the skill/plugin you want to install.
 
+# Skill Name
+
+<!-- A concise, one-sentence description of what this skill does -->
+A brief overview of the skill's purpose and utility.
+
+# Skill Template
+
+## Prerequisites
+
+<!-- List any dependencies, keys, or tools required to run this skill -->
+* Python 3.10+ (if running custom scripts)
+* Environment variables: `MY_API_KEY` (if applicable)
+* Required CLI tools installed globally
+
+## Configuration
+
+<!-- How to set up or configure the skill within the environment -->
+To configure this skill, ensure the following configuration options or files are present:
+
+```json
+{
+  "setting_name": "value"
+}
+```
+
+## Usage
+
+<!-- Explain the syntax, commands, or natural language prompts used to trigger this skill -->
+To trigger this skill during a Claude Code session, you can use the following commands or prompt structures:
+
+### Command Line / Slash Commands
+```bash
+/skill-command [arguments]
+```
+
+### Natural Language Examples
+* "Analyze the current project using [Skill Name]."
+* "Run the automation workflow for the latest commit."
+
+## Examples
+
+### Example 1: Basic Execution
+**Input Prompt:**
+> "Run the skill on the main branch."
+
+**Expected Output:**
+```text
+[Skill] Starting execution...
+[Skill] Processing completed successfully.
+```
+
+### Example 2: Advanced Usage
+Describe a more complex scenario involving optional flags, parameters, or edge cases here.
+
+## Troubleshooting
+
+* **Issue:** Skill not recognized by Claude Code.  
+  **Solution:** Run `/skills` to verify installation. Restart the session if necessary.
+* **Issue:** Permission denied errors.  
+  **Solution:** Ensure the underlying scripts or binaries have execution permissions (`chmod +x <file>`).
