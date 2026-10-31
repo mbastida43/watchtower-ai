@@ -1,4 +1,4 @@
 
-## Tutoriais desenvolvidos por Jesse Freitas
+# Tutoriais desenvolvidos por Jessé Freitas
 
-# arquivos contidos nessa pasta
+## Files
