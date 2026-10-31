@@ -33,7 +33,7 @@ https://medium.com/artificial-corner/we-built-70-claude-skills-these-are-the-bes
 
 https://github.com/mbastida43/claude-code-skills-ranked/
 
-8)  A Senior developer that knows how to deal with a clean code
+8)  A Senior developer that knows how to deal with clean code
 
 https://github.com/DietrichGebert/ponytail
 
@@ -43,7 +43,7 @@ https://github.com/mbastida43/Ultimate_SaaS_Security_Playbook -
 
 ---
 
-If you want information on how to add those skills to the Claude code, go through the root of this repo and enter in the tutorial\marlonbastida
+If you want information on how to add those skills to the Claude code, go through the root of this repo and enter the tutorials\marlonbastida
 
 
 ## License
