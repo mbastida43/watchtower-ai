@@ -37,6 +37,14 @@ https://github.com/mbastida43/claude-code-skills-ranked/
 
 https://github.com/DietrichGebert/ponytail
 
+8)  Ultimate_SaaS_Security_Playbook
+
+https://github.com/mbastida43/Ultimate_SaaS_Security_Playbook - 
+
+---
+
+If you want information on how to add those skills to the Claude code, go through the root of this repo and enter in the tutorial\marlonbastida
+
 
 ## License
 
