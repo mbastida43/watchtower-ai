@@ -5,6 +5,12 @@ In this section we will have tutorials in PDF format and link with repositories 
 ## Claude with Ollama
 
  - CLAUDE OLLAMA.pdf - Integration Claude with Ollama
+
+## Guide to make content by video
+
+ - guia-fabrica-de-conteudo.html - Guide that amke an explanation about how to do video content with claude code
+ - kit-skills-mentoria - Skills used to do the things happen
+
 Made by  *Jessé Freitas*
  
  ## OmniCompress
